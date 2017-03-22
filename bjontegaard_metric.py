@@ -1,6 +1,7 @@
 import numpy as np
+import scipy.interpolate
 
-def BD_PSNR(R1, PSNR1, R2, PSNR2):
+def BD_PSNR(R1, PSNR1, R2, PSNR2, piecewise=0):
     lR1 = np.log(R1)
     lR2 = np.log(R2)
 
@@ -12,18 +13,30 @@ def BD_PSNR(R1, PSNR1, R2, PSNR2):
     max_int = min(max(lR1), max(lR2))
 
     # find integral
-    p_int1 = np.polyint(p1)
-    p_int2 = np.polyint(p2)
+    if piecewise == 0:
+        p_int1 = np.polyint(p1)
+        p_int2 = np.polyint(p2)
 
-    int1 = np.polyval(p_int1, max_int) - np.polyval(p_int1, min_int)
-    int2 = np.polyval(p_int2, max_int) - np.polyval(p_int2, min_int)
+        int1 = np.polyval(p_int1, max_int) - np.polyval(p_int1, min_int)
+        int2 = np.polyval(p_int2, max_int) - np.polyval(p_int2, min_int)
+    else:
+        # See https://chromium.googlesource.com/webm/contributor-guide/+/master/scripts/visual_metrics.py
+        lin = np.linspace(min_int, max_int, num=100, retstep=True)
+        interval = lin[1]
+        samples = lin[0]
+        v1 = scipy.interpolate.pchip_interpolate(np.sort(lR1), np.sort(PSNR1), samples)
+        v2 = scipy.interpolate.pchip_interpolate(np.sort(lR2), np.sort(PSNR2), samples)
+        # Calculate the integral using the trapezoid method on the samples.
+        int1 = np.trapz(v1, dx=interval)
+        int2 = np.trapz(v2, dx=interval)
 
     # find avg diff
     avg_diff = (int2-int1)/(max_int-min_int)
 
     return avg_diff
 
-def BD_RATE(R1, PSNR1, R2, PSNR2):
+
+def BD_RATE(R1, PSNR1, R2, PSNR2, piecewise=0):
     lR1 = np.log(R1)
     lR2 = np.log(R2)
 
@@ -36,11 +49,21 @@ def BD_RATE(R1, PSNR1, R2, PSNR2):
     max_int = min(max(PSNR1), max(PSNR2))
 
     # find integral
-    p_int1 = np.polyint(p1)
-    p_int2 = np.polyint(p2)
+    if piecewise == 0:
+        p_int1 = np.polyint(p1)
+        p_int2 = np.polyint(p2)
 
-    int1 = np.polyval(p_int1, max_int) - np.polyval(p_int1, min_int)
-    int2 = np.polyval(p_int2, max_int) - np.polyval(p_int2, min_int)
+        int1 = np.polyval(p_int1, max_int) - np.polyval(p_int1, min_int)
+        int2 = np.polyval(p_int2, max_int) - np.polyval(p_int2, min_int)
+    else:
+        lin = np.linspace(min_int, max_int, num=100, retstep=True)
+        interval = lin[1]
+        samples = lin[0]
+        v1 = scipy.interpolate.pchip_interpolate(np.sort(PSNR1), np.sort(lR1), samples)
+        v2 = scipy.interpolate.pchip_interpolate(np.sort(PSNR2), np.sort(lR2), samples)
+        # Calculate the integral using the trapezoid method on the samples.
+        int1 = np.trapz(v1, dx=interval)
+        int2 = np.trapz(v2, dx=interval)
 
     # find avg diff
     avg_exp_diff = (int2-int1)/(max_int-min_int)
