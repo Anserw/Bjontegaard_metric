@@ -16,8 +16,8 @@ PSNR12 = np.array([40.18, 36.18, 32.24, 31.02])
 R22 = np.array([883.34, 402.8, 201.93, 102.75])
 PSNR22 = np.array([40.09, 36.21, 32.17, 30.24])
 
-print 'BD-PSNR: ', BD_PSNR(R12, PSNR12, R22, PSNR22)
-print 'BD-RATE: ', BD_RATE(R12, PSNR12, R22, PSNR22)
+print 'BD-PSNR: ', BD_PSNR(R12, PSNR12, R22, PSNR22, 1)
+print 'BD-RATE: ', BD_RATE(R12, PSNR12, R22, PSNR22, 1)
 
 
 print '\nSample 3'
