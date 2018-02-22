@@ -5,6 +5,9 @@ def BD_PSNR(R1, PSNR1, R2, PSNR2, piecewise=0):
     lR1 = np.log(R1)
     lR2 = np.log(R2)
 
+    PSNR1 = np.array(PSNR1)
+    PSNR2 = np.array(PSNR2)
+
     p1 = np.polyfit(lR1, PSNR1, 3)
     p2 = np.polyfit(lR2, PSNR2, 3)
 
@@ -24,8 +27,8 @@ def BD_PSNR(R1, PSNR1, R2, PSNR2, piecewise=0):
         lin = np.linspace(min_int, max_int, num=100, retstep=True)
         interval = lin[1]
         samples = lin[0]
-        v1 = scipy.interpolate.pchip_interpolate(np.sort(lR1), np.sort(PSNR1), samples)
-        v2 = scipy.interpolate.pchip_interpolate(np.sort(lR2), np.sort(PSNR2), samples)
+        v1 = scipy.interpolate.pchip_interpolate(np.sort(lR1), PSNR1[np.argsort(lR1)], samples)
+        v2 = scipy.interpolate.pchip_interpolate(np.sort(lR2), PSNR2[np.argsort(lR2)], samples)
         # Calculate the integral using the trapezoid method on the samples.
         int1 = np.trapz(v1, dx=interval)
         int2 = np.trapz(v2, dx=interval)
@@ -59,8 +62,8 @@ def BD_RATE(R1, PSNR1, R2, PSNR2, piecewise=0):
         lin = np.linspace(min_int, max_int, num=100, retstep=True)
         interval = lin[1]
         samples = lin[0]
-        v1 = scipy.interpolate.pchip_interpolate(np.sort(PSNR1), np.sort(lR1), samples)
-        v2 = scipy.interpolate.pchip_interpolate(np.sort(PSNR2), np.sort(lR2), samples)
+        v1 = scipy.interpolate.pchip_interpolate(np.sort(PSNR1), lR1[np.argsort(PSNR1)], samples)
+        v2 = scipy.interpolate.pchip_interpolate(np.sort(PSNR2), lR2[np.argsort(PSNR2)], samples)
         # Calculate the integral using the trapezoid method on the samples.
         int1 = np.trapz(v1, dx=interval)
         int2 = np.trapz(v2, dx=interval)
